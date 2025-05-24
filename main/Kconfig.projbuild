@@ -1,0 +1,21 @@
+menu "Config periph BT"
+
+config BT_REMOTE_NAME
+    string "Nom du périphérique BT"
+	default "hama Freedom Lit"
+	help
+		BT_REMOTE_NAME (Bluetooth device name) for the example to connect to.
+
+config SSID_WIFI
+    string "SSID wifi pour connexion webserver"
+    default "newghetto"
+    help
+        SSID_WIFI
+
+config PASS_WIFI
+    string "Mot de passe wifi"
+    default "59jaja59"
+    help
+        PASS_WIFI
+
+endmenu
