@@ -19,6 +19,11 @@ esp_err_t audio_manager_start(void);
  */
 esp_err_t audio_manager_stop(void);
 
+/**
+ * @brief Passe immédiatement au morceau suivant.
+ */
+esp_err_t audio_manager_next(void);
+
 #ifdef __cplusplus
 }
 #endif

@@ -35,6 +35,11 @@ size_t playlist_manager_get_track_count(void);
  */
 size_t playlist_manager_get_current_index(void);
 
+/**
+ * @brief Retourne le chemin du morceau actuellement sélectionné.
+ */
+const char *playlist_manager_get_current_track(void);
+
 #ifdef __cplusplus
 }
 #endif
