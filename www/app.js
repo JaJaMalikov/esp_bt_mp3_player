@@ -15,7 +15,7 @@ function loadPlaylist() {
         const li = document.createElement('li');
         li.textContent = file;
         li.onclick = () => {
-          fetch('/playfile?name=' + encodeURIComponent(file));
+          fetch('/play?file=' + encodeURIComponent(file));
         };
         list.appendChild(li);
       });

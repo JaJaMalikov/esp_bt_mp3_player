@@ -8,6 +8,7 @@
 #include "esp_gap_bt_api.h"
 #include "esp_a2dp_api.h"
 #include "esp_avrc_api.h"
+#include "audio_manager.h"
 
 static const char *TAG = "bt_control";
 
@@ -124,17 +125,20 @@ void bt_app_avrc_ct_cb(avrc_ct_cb_event_t event, avrc_ct_cb_param_t *param) {
         case AVRC_CT_PASSTHROUGH_RSP_EVT:
             switch(param->psth_rsp.key_code) {
                 case AVRC_PT_CMD_PLAY:
-                    play_file(playlist[current_index]); break;
+                    audio_manager_start();
+                    break;
                 case AVRC_PT_CMD_STOP:
                 case AVRC_PT_CMD_PAUSE:
-                    stop_playback(); break;
+                    audio_manager_stop();
+                    break;
                 case AVRC_PT_CMD_FORWARD:
-                    current_index = (current_index+1)%playlist_sz;
-                    play_file(playlist[current_index]); break;
+                    audio_manager_next();
+                    break;
                 case AVRC_PT_CMD_BACKWARD:
-                    current_index = (current_index-1+playlist_sz)%playlist_sz;
-                    play_file(playlist[current_index]); break;
-                default: break;
+                    audio_manager_prev();
+                    break;
+                default:
+                    break;
             }
             break;
         default: break;

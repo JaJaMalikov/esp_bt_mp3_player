@@ -139,3 +139,32 @@ const char *playlist_manager_get_current_track(void) {
     return track_list[shuffle_order[idx]];
 }
 
+const char *playlist_manager_get_prev(void) {
+    if (track_count == 0) {
+        return NULL;
+    }
+    if (current_index == 0) {
+        current_index = track_count;
+    }
+    current_index--;
+    return track_list[shuffle_order[current_index]];
+}
+
+esp_err_t playlist_manager_set_current_by_name(const char *filename) {
+    if (!filename) return ESP_ERR_INVALID_ARG;
+    for (size_t i = 0; i < track_count; i++) {
+        const char *path = track_list[i];
+        const char *name = strrchr(path, '/');
+        name = name ? name + 1 : path;
+        if (strcmp(name, filename) == 0) {
+            for (size_t j = 0; j < track_count; j++) {
+                if (shuffle_order[j] == i) {
+                    current_index = j + 1;
+                    return ESP_OK;
+                }
+            }
+        }
+    }
+    return ESP_ERR_NOT_FOUND;
+}
+
