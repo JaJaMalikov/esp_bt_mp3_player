@@ -16,6 +16,16 @@ static esp_bd_addr_t remote_bd_addr = {0};
 static bool a2dp_connected = false;
 static bool device_found = false;
 
+bool bt_control_is_connected(void) {
+    return a2dp_connected;
+}
+
+void bt_control_start_discovery(void) {
+    device_found = false;
+    ESP_LOGI(TAG, "Starting device discovery...");
+    esp_bt_gap_start_discovery(ESP_BT_INQ_MODE_GENERAL_INQUIRY, 5, 0);
+}
+
 static char *bda2str(const esp_bd_addr_t bda, char *str, size_t size) {
     if (!bda || !str || size < 18) return NULL;
     snprintf(str, size, "%02x:%02x:%02x:%02x:%02x:%02x",
@@ -119,6 +129,10 @@ esp_err_t bt_control_init(void) {
   esp_bt_gap_set_device_name("ESP_SOURCE_STREAM_DEMO");
   esp_bt_gap_set_pin(pin_type, 1, pin_code);
   esp_bt_gap_register_callback(bt_app_gap_cb);
+  esp_a2d_register_callback(bt_app_a2dp_cb);
+  esp_a2d_source_register_data_callback(NULL);
+  ESP_ERROR_CHECK(esp_a2d_source_init());
+  esp_bt_gap_set_scan_mode(ESP_BT_CONNECTABLE, ESP_BT_GENERAL_DISCOVERABLE);
 
   const char *remote_name = NULL;
   remote_name = CONFIG_BT_REMOTE_NAME;
@@ -127,6 +141,8 @@ esp_err_t bt_control_init(void) {
   } else {
     memcpy(&remote_bt_device_name, "ESP_SINK_STREAM_DEMO", ESP_BT_GAP_MAX_BDNAME_LEN);
   }
+
+  bt_control_start_discovery();
 
     ESP_LOGI(TAG, "Bluetooth A2DP source initialized");
     return ESP_OK;
