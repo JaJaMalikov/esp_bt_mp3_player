@@ -89,6 +89,23 @@ esp_bt_gap_start_discovery(ESP_BT_INQ_MODE_GENERAL_INQUIRY, 5, 0);
     return ESP_OK;
 }
 
+esp_err_t audio_manager_next(void) {
+    if (!pipeline) return ESP_FAIL;
+
+    audio_pipeline_stop(pipeline);
+    audio_pipeline_wait_for_stop(pipeline);
+
+    const char *next_uri = playlist_manager_get_next();
+    audio_element_set_uri(fatfs_reader, next_uri);
+    ESP_LOGI(TAG, "Skipping to: %s", next_uri);
+    audio_pipeline_reset_ringbuffer(pipeline);
+    audio_pipeline_reset_elements(pipeline);
+    audio_pipeline_change_state(pipeline, AEL_STATE_INIT);
+    audio_pipeline_run(pipeline);
+
+    return ESP_OK;
+}
+
 esp_err_t audio_manager_stop(void) {
     ESP_LOGI(TAG, "Stopping audio pipeline");
     if (!pipeline) return ESP_FAIL;

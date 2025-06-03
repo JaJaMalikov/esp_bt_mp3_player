@@ -131,3 +131,11 @@ size_t playlist_manager_get_current_index(void) {
     return current_index;
 }
 
+const char *playlist_manager_get_current_track(void) {
+    if (track_count == 0) {
+        return NULL;
+    }
+    size_t idx = current_index > 0 ? current_index - 1 : 0;
+    return track_list[shuffle_order[idx]];
+}
+
