@@ -1,9 +1,21 @@
+
 <!DOCTYPE html>
 <html lang="fr">
-<head><meta charset="UTF-8"><title>MP3 Player</title></head>
+<head>
+  <meta charset="UTF-8">
+  <title>Lecteur MP3 ESP32</title>
+  <link rel="stylesheet" href="style.css">
+</head>
 <body>
-  <h1>ESP Web MP3 Player</h1>
-  <button onclick="fetch('/api/ping').then(r=>r.text()).then(alert)">Ping</button>
+  <h1>🎵 Lecteur MP3 Bluetooth</h1>
+  <div class="controls">
+    <button onclick="sendCommand('play')">▶️ Play</button>
+    <button onclick="sendCommand('pause')">⏸️ Pause</button>
+    <button onclick="sendCommand('next')">⏭️ Suivant</button>
+  </div>
+  <h2>Fichiers disponibles :</h2>
+  <ul id="playlist"></ul>
+
   <script src="app.js"></script>
 </body>
 </html>

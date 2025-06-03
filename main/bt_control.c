@@ -116,6 +116,31 @@ static void bt_app_a2dp_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *param) 
     }
 }
 
+void bt_app_avrc_ct_cb(avrc_ct_cb_event_t event, avrc_ct_cb_param_t *param) {
+    switch(event) {
+        case AVRC_CT_CONNECTION_STATE_EVT:
+            ESP_LOGI(TAG, "AVRCP Connection State: %d", param->conn_stat.connected);
+            break;
+        case AVRC_CT_PASSTHROUGH_RSP_EVT:
+            switch(param->psth_rsp.key_code) {
+                case AVRC_PT_CMD_PLAY:
+                    play_file(playlist[current_index]); break;
+                case AVRC_PT_CMD_STOP:
+                case AVRC_PT_CMD_PAUSE:
+                    stop_playback(); break;
+                case AVRC_PT_CMD_FORWARD:
+                    current_index = (current_index+1)%playlist_sz;
+                    play_file(playlist[current_index]); break;
+                case AVRC_PT_CMD_BACKWARD:
+                    current_index = (current_index-1+playlist_sz)%playlist_sz;
+                    play_file(playlist[current_index]); break;
+                default: break;
+            }
+            break;
+        default: break;
+    }
+}
+
 esp_err_t bt_control_init(void) {
   esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
   esp_bt_pin_type_t pin_type = ESP_BT_PIN_TYPE_FIXED;
