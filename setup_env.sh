@@ -2,10 +2,10 @@
 set -euo pipefail
 
 # Update the package list and install system packages
-sudo apt-get update -y
-sudo apt-get install -y \
-    git wget flex bison gperf cmake ninja-build ccache \
-    libffi-dev libssl-dev python3 python3-pip python3-venv
+#sudo apt-get update -y
+#sudo apt-get install -y \
+ #   git wget flex bison gperf cmake ninja-build ccache \
+  #  libffi-dev libssl-dev python3 python3-pip python3-venv
 
 # Directory where the ESP frameworks will be installed
 mkdir -p "$HOME/esp"
