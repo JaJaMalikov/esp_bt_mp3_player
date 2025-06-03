@@ -21,6 +21,11 @@ esp_err_t playlist_manager_init(void);
 const char *playlist_manager_get_next(void);
 
 /**
+ * @brief Recupere le chemin du fichier precedent dans l'ordre shuffle.
+ */
+const char *playlist_manager_get_prev(void);
+
+/**
  * @brief Réinitialise l'index de lecture à zéro (début de playlist).
  */
 void playlist_manager_reset(void);
@@ -39,6 +44,11 @@ size_t playlist_manager_get_current_index(void);
  * @brief Retourne le chemin du morceau actuellement sélectionné.
  */
 const char *playlist_manager_get_current_track(void);
+
+/**
+ * @brief Positionne l'index courant sur le fichier donne (nom seul).
+ */
+esp_err_t playlist_manager_set_current_by_name(const char *filename);
 
 #ifdef __cplusplus
 }

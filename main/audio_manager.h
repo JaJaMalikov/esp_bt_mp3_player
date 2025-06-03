@@ -24,6 +24,16 @@ esp_err_t audio_manager_stop(void);
  */
 esp_err_t audio_manager_next(void);
 
+/**
+ * @brief Reviens au morceau precedent dans la playlist.
+ */
+esp_err_t audio_manager_prev(void);
+
+/**
+ * @brief Lit immediatement le fichier specifie.
+ */
+esp_err_t audio_manager_play(const char *path);
+
 #ifdef __cplusplus
 }
 #endif

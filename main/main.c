@@ -20,11 +20,10 @@
 
 #define WIFI_AP_SSID "mp3-player"
 #define WIFI_AP_PASS "12345678"
+#define MOUNT_POINT MP3_DIR
 
 
 static const char *TAG = "main";
-static audio_element_handle_t fatfs_stream_reader, mp3_decoder, bt_stream_writer;
-static audio_pipeline_handle_t pipeline;
 static httpd_handle_t http_server = NULL;
 
 void init_wifi_ap() {
@@ -81,7 +80,10 @@ esp_err_t play_handler(httpd_req_t *req) {
     if (httpd_req_get_url_query_str(req, buf, len)==ESP_OK) {
         char file[64];
         if (httpd_query_key_value(buf, "file", file, sizeof(file))==ESP_OK) {
-            play_file(file);
+            char path[128];
+            snprintf(path, sizeof(path), "%s/%s", MP3_DIR, file);
+            playlist_manager_set_current_by_name(file);
+            audio_manager_play(path);
             httpd_resp_sendstr(req, "OK");
             return ESP_OK;
         }
@@ -92,13 +94,11 @@ esp_err_t play_handler(httpd_req_t *req) {
 
 esp_err_t ctl_handler(httpd_req_t *req) {
     if (strcmp(req->uri, "/pause")==0) {
-        stop_playback();
+        audio_manager_stop();
     } else if (strcmp(req->uri, "/next")==0) {
-        current_index = (current_index+1) % playlist_sz;
-        play_file(playlist[current_index]);
+        audio_manager_next();
     } else if (strcmp(req->uri, "/previous")==0) {
-        current_index = (current_index-1+playlist_sz) % playlist_sz;
-        play_file(playlist[current_index]);
+        audio_manager_prev();
     }
     httpd_resp_sendstr(req, "OK");
     return ESP_OK;

@@ -6,7 +6,6 @@
 #include "fatfs_stream.h"
 #include "mp3_decoder.h"
 #include "a2dp_stream.h"
-
 #include "playlist_manager.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -19,7 +18,8 @@ static audio_element_handle_t mp3_decoder = NULL;
 static audio_element_handle_t bt_stream_writer = NULL;
 static audio_event_iface_handle_t evt = NULL;
 
-static void audio_event_task(void *param) {
+static void audio_event_task(void *param)
+{
     while (1) {
         audio_event_iface_msg_t msg;
         if (audio_event_iface_listen(evt, &msg, portMAX_DELAY) != ESP_OK) {
@@ -30,22 +30,22 @@ static void audio_event_task(void *param) {
             msg.source == (void *)fatfs_reader &&
             msg.cmd == AEL_MSG_CMD_REPORT_STATUS &&
             (intptr_t)msg.data == AEL_STATUS_STATE_FINISHED) {
-                ESP_LOGI(TAG, "Track finished. Loading next track.");
-                audio_pipeline_stop(pipeline);
-                audio_pipeline_wait_for_stop(pipeline);
-                const char *next_uri = playlist_manager_get_next();
-                audio_element_set_uri(fatfs_reader, next_uri);
-                ESP_LOGI(TAG, "Next track: %s", next_uri);
-                audio_pipeline_reset_ringbuffer(pipeline);
-      audio_pipeline_reset_elements(pipeline);
-      audio_pipeline_change_state(pipeline, AEL_STATE_INIT);
-      audio_pipeline_run(pipeline);
-            }
+            ESP_LOGI(TAG, "Track finished. Loading next track.");
+            audio_pipeline_stop(pipeline);
+            audio_pipeline_wait_for_stop(pipeline);
+            const char *next_uri = playlist_manager_get_next();
+            audio_element_set_uri(fatfs_reader, next_uri);
+            ESP_LOGI(TAG, "Next track: %s", next_uri);
+            audio_pipeline_reset_ringbuffer(pipeline);
+            audio_pipeline_reset_elements(pipeline);
+            audio_pipeline_change_state(pipeline, AEL_STATE_INIT);
+            audio_pipeline_run(pipeline);
         }
     }
+}
 
-
-esp_err_t audio_manager_start(void) {
+esp_err_t audio_manager_start(void)
+{
     ESP_LOGI(TAG, "Starting audio pipeline");
 
     audio_pipeline_cfg_t pipeline_cfg = DEFAULT_AUDIO_PIPELINE_CONFIG();
@@ -62,12 +62,14 @@ esp_err_t audio_manager_start(void) {
     mp3_decoder_cfg_t mp3_cfg = DEFAULT_MP3_DECODER_CONFIG();
     mp3_decoder = mp3_decoder_init(&mp3_cfg);
 
-  a2dp_stream_config_t a2dp_config = {
-    .type = AUDIO_STREAM_WRITER,
-    .user_callback = { 0 },
-  };
-  bt_stream_writer = a2dp_stream_init(&a2dp_config);
-esp_bt_gap_start_discovery(ESP_BT_INQ_MODE_GENERAL_INQUIRY, 5, 0);
+    a2dp_stream_config_t a2dp_config = {
+        .type = AUDIO_STREAM_WRITER,
+        .user_callback = { 0 },
+    };
+    bt_stream_writer = a2dp_stream_init(&a2dp_config);
+
+    esp_bt_gap_start_discovery(ESP_BT_INQ_MODE_GENERAL_INQUIRY, 5, 0);
+
     audio_pipeline_register(pipeline, fatfs_reader, "file");
     audio_pipeline_register(pipeline, mp3_decoder, "mp3");
     audio_pipeline_register(pipeline, bt_stream_writer, "bt");
@@ -89,24 +91,41 @@ esp_bt_gap_start_discovery(ESP_BT_INQ_MODE_GENERAL_INQUIRY, 5, 0);
     return ESP_OK;
 }
 
-esp_err_t audio_manager_next(void) {
+static esp_err_t change_track(const char *uri)
+{
     if (!pipeline) return ESP_FAIL;
 
     audio_pipeline_stop(pipeline);
     audio_pipeline_wait_for_stop(pipeline);
 
-    const char *next_uri = playlist_manager_get_next();
-    audio_element_set_uri(fatfs_reader, next_uri);
-    ESP_LOGI(TAG, "Skipping to: %s", next_uri);
+    audio_element_set_uri(fatfs_reader, uri);
+    ESP_LOGI(TAG, "Loading: %s", uri);
     audio_pipeline_reset_ringbuffer(pipeline);
     audio_pipeline_reset_elements(pipeline);
     audio_pipeline_change_state(pipeline, AEL_STATE_INIT);
     audio_pipeline_run(pipeline);
-
     return ESP_OK;
 }
 
-esp_err_t audio_manager_stop(void) {
+esp_err_t audio_manager_next(void)
+{
+    const char *next_uri = playlist_manager_get_next();
+    return change_track(next_uri);
+}
+
+esp_err_t audio_manager_prev(void)
+{
+    const char *prev_uri = playlist_manager_get_prev();
+    return change_track(prev_uri);
+}
+
+esp_err_t audio_manager_play(const char *path)
+{
+    return change_track(path);
+}
+
+esp_err_t audio_manager_stop(void)
+{
     ESP_LOGI(TAG, "Stopping audio pipeline");
     if (!pipeline) return ESP_FAIL;
 
@@ -131,4 +150,3 @@ esp_err_t audio_manager_stop(void) {
     pipeline = NULL;
     return ESP_OK;
 }
-
