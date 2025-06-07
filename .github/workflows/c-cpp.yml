@@ -1,0 +1,28 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: configure
+      run: ./configure
+    - name: make
+      run: make
+    - name: make check
+      run: make check
+    - name: make distcheck
+      run: make distcheck
+            - name: ctag esp idf build
+  # You may pin to the exact commit or the version.
+  # uses: ctag-fh-kiel/esp-idf-action@a2d28e2385557ad248fa74d063e4a5c0cda40c03
+  uses: ctag-fh-kiel/esp-idf-action@6
+          
