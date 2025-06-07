@@ -5,6 +5,14 @@ function sendCommand(cmd) {
     .then(txt => console.log(txt));
 }
 
+function updateCurrent() {
+  fetch('/current')
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('current').textContent = data.track;
+    });
+}
+
 function loadPlaylist() {
   fetch('/list')
     .then(res => res.json())
@@ -17,9 +25,12 @@ function loadPlaylist() {
         li.onclick = () => {
           fetch('/play?file=' + encodeURIComponent(file));
         };
-        list.appendChild(li);
-      });
+      list.appendChild(li);
     });
+  });
 }
-
-window.onload = loadPlaylist;
+window.onload = () => {
+  loadPlaylist();
+  updateCurrent();
+  setInterval(updateCurrent, 5000);
+};

@@ -11,9 +11,8 @@
 #include "sdmmc_cmd.h"
 #include "esp_vfs_fat.h"
 #include "esp_random.h"
+#include "path_config.h"
 
-#define SD_MOUNT_POINT "/sdcard"
-#define MP3_DIR "/sdcard/mp3"
 #define MAX_TRACKS 512
 #define NVS_NAMESPACE "playlist"
 #define NVS_KEY_ORDER "shuffle_order"

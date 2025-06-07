@@ -17,6 +17,7 @@
 #include "esp_wifi.h"
 #include "esp_http_server.h"
 #include <dirent.h>
+#include "path_config.h"
 
 #define WIFI_AP_SSID "mp3-player"
 #define WIFI_AP_PASS "12345678"
@@ -104,6 +105,24 @@ esp_err_t ctl_handler(httpd_req_t *req) {
     return ESP_OK;
 }
 
+esp_err_t current_handler(httpd_req_t *req) {
+    const char *path = playlist_manager_get_current_track();
+    if (!path) {
+        httpd_resp_send_404(req);
+        return ESP_OK;
+    }
+    const char *name = strrchr(path, '/');
+    name = name ? name + 1 : path;
+    char resp[128];
+    snprintf(resp, sizeof(resp), "{\"track\":\"%s\",\"index\":%d,\"total\":%d}",
+             name,
+             (int)playlist_manager_get_current_index(),
+             (int)playlist_manager_get_track_count());
+    httpd_resp_set_type(req, "application/json");
+    httpd_resp_sendstr(req, resp);
+    return ESP_OK;
+}
+
 void start_httpd() {
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     httpd_start(&http_server, &config);
@@ -112,11 +131,13 @@ void start_httpd() {
     httpd_uri_t pause_uri = {"/pause", HTTP_GET, ctl_handler, NULL};
     httpd_uri_t next_uri = {"/next", HTTP_GET, ctl_handler, NULL};
     httpd_uri_t prev_uri = {"/previous", HTTP_GET, ctl_handler, NULL};
+    httpd_uri_t current_uri = {"/current", HTTP_GET, current_handler, NULL};
     httpd_register_uri_handler(http_server, &list_uri);
     httpd_register_uri_handler(http_server, &play_uri);
     httpd_register_uri_handler(http_server, &pause_uri);
     httpd_register_uri_handler(http_server, &next_uri);
     httpd_register_uri_handler(http_server, &prev_uri);
+    httpd_register_uri_handler(http_server, &current_uri);
 }
 
 
