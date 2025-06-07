@@ -13,6 +13,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: ctag esp idf build
+      uses: ctag-fh-kiel/esp-idf-action@a2d28e2385557ad248fa74d063e4a5c0cda40c03
     - name: configure
       run: ./configure
     - name: make
@@ -21,7 +23,5 @@ jobs:
       run: make check
     - name: make distcheck
       run: make distcheck
-    - name: ctag esp idf build
-      uses: ctag-fh-kiel/esp-idf-action@a2d28e2385557ad248fa74d063e4a5c0cda40c03
-     # uses: ctag-fh-kiel/esp-idf-action@6
+    # uses: ctag-fh-kiel/esp-idf-action@6
           
