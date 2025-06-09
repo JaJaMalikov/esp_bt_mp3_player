@@ -145,6 +145,29 @@ void bt_app_avrc_ct_cb(esp_avrc_ct_cb_event_t event, esp_avrc_ct_cb_param_t *par
     }
 }
 
+static void bt_app_avrc_tg_cb(esp_avrc_tg_cb_event_t event, esp_avrc_tg_cb_param_t *param) {
+    if (event == ESP_AVRC_TG_PASSTHROUGH_CMD_EVT &&
+        param->psth_cmd.key_state == ESP_AVRC_PT_CMD_STATE_PRESSED) {
+        switch (param->psth_cmd.key_code) {
+            case ESP_AVRC_PT_CMD_PLAY:
+                audio_manager_resume();
+                break;
+            case ESP_AVRC_PT_CMD_STOP:
+            case ESP_AVRC_PT_CMD_PAUSE:
+                audio_manager_pause();
+                break;
+            case ESP_AVRC_PT_CMD_FORWARD:
+                audio_manager_next();
+                break;
+            case ESP_AVRC_PT_CMD_BACKWARD:
+                audio_manager_prev();
+                break;
+            default:
+                break;
+        }
+    }
+}
+
 esp_err_t bt_control_init(void) {
   esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
   esp_bt_pin_type_t pin_type = ESP_BT_PIN_TYPE_FIXED;
@@ -154,6 +177,9 @@ esp_err_t bt_control_init(void) {
   ESP_ERROR_CHECK(esp_bt_controller_enable(ESP_BT_MODE_CLASSIC_BT));
   ESP_ERROR_CHECK(esp_bluedroid_init());
   ESP_ERROR_CHECK(esp_bluedroid_enable());
+
+  ESP_ERROR_CHECK(esp_avrc_tg_init());
+  esp_avrc_tg_register_callback(bt_app_avrc_tg_cb);
 
   esp_bt_gap_set_device_name("ESP_SOURCE_STREAM_DEMO");
   esp_bt_gap_set_pin(pin_type, 1, pin_code);

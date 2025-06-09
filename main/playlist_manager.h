@@ -11,7 +11,7 @@ extern "C" {
 
 /**
  * @brief Initialise le gestionnaire de playlist.
- *        Scanne la carte SD et charge (ou génère) l'ordre aléatoire.
+ *        Scanne la carte SD et génère un ordre aléatoire à chaque démarrage.
  */
 esp_err_t playlist_manager_init(void);
 
