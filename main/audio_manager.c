@@ -119,6 +119,20 @@ esp_err_t audio_manager_prev(void)
     return change_track(prev_uri);
 }
 
+esp_err_t audio_manager_pause(void)
+{
+    if (!pipeline) return ESP_FAIL;
+    ESP_LOGI(TAG, "Pausing audio pipeline");
+    return audio_pipeline_pause(pipeline);
+}
+
+esp_err_t audio_manager_resume(void)
+{
+    if (!pipeline) return ESP_FAIL;
+    ESP_LOGI(TAG, "Resuming audio pipeline");
+    return audio_pipeline_resume(pipeline);
+}
+
 esp_err_t audio_manager_play(const char *path)
 {
     return change_track(path);

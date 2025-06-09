@@ -44,6 +44,10 @@ static esp_err_t scan_directory(void) {
 }
 
 static void shuffle_tracks(void) {
+    if (track_count == 0) {
+        current_index = 0;
+        return;
+    }
     for (size_t i = 0; i < track_count; i++) {
         shuffle_order[i] = i;
     }
@@ -103,6 +107,11 @@ esp_err_t err;
     esp_err_t scan_err = scan_directory();
     if (scan_err != ESP_OK) return scan_err;
 
+    if (track_count == 0) {
+        ESP_LOGW(TAG, "No MP3 files found");
+        return ESP_ERR_NOT_FOUND;
+    }
+
     if (load_shuffle_order() != ESP_OK) {
         shuffle_tracks();
         save_shuffle_order();
@@ -111,6 +120,9 @@ esp_err_t err;
 }
 
 const char *playlist_manager_get_next(void) {
+    if (track_count == 0) {
+        return NULL;
+    }
     if (current_index >= track_count) {
         shuffle_tracks();
         save_shuffle_order();
