@@ -5,8 +5,6 @@
 #include <dirent.h>
 #include <stdlib.h>
 #include "esp_log.h"
-#include "nvs_flash.h"
-#include "nvs.h"
 #include "driver/sdmmc_host.h"
 #include "sdmmc_cmd.h"
 #include "esp_vfs_fat.h"
@@ -14,8 +12,6 @@
 #include "path_config.h"
 
 #define MAX_TRACKS 512
-#define NVS_NAMESPACE "playlist"
-#define NVS_KEY_ORDER "shuffle_order"
 
 static const char *TAG = "playlist_mgr";
 static char *track_list[MAX_TRACKS];
@@ -60,33 +56,6 @@ static void shuffle_tracks(void) {
     current_index = 0;
 }
 
-static esp_err_t save_shuffle_order(void) {
-    nvs_handle_t handle;
-    esp_err_t err = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &handle);
-    if (err != ESP_OK) return err;
-
-    err = nvs_set_blob(handle, NVS_KEY_ORDER, shuffle_order, sizeof(size_t) * track_count);
-    if (err == ESP_OK) err = nvs_commit(handle);
-
-    nvs_close(handle);
-    ESP_LOGI(TAG, "Shuffle saved to NVS");
-    return err;
-}
-
-static esp_err_t load_shuffle_order(void) {
-    nvs_handle_t handle;
-    esp_err_t err = nvs_open(NVS_NAMESPACE, NVS_READONLY, &handle);
-    if (err != ESP_OK) return err;
-
-    size_t required_size = sizeof(size_t) * track_count;
-    err = nvs_get_blob(handle, NVS_KEY_ORDER, shuffle_order, &required_size);
-    nvs_close(handle);
-    if (err == ESP_OK && required_size == sizeof(size_t) * track_count) {
-        ESP_LOGI(TAG, "Shuffle loaded from NVS");
-        return ESP_OK;
-    }
-    return ESP_FAIL;
-}
 
 esp_err_t playlist_manager_init(void) {
 esp_err_t err;
@@ -112,10 +81,7 @@ esp_err_t err;
         return ESP_ERR_NOT_FOUND;
     }
 
-    if (load_shuffle_order() != ESP_OK) {
-        shuffle_tracks();
-        save_shuffle_order();
-    }
+    shuffle_tracks();
     return ESP_OK;
 }
 
@@ -125,7 +91,6 @@ const char *playlist_manager_get_next(void) {
     }
     if (current_index >= track_count) {
         shuffle_tracks();
-        save_shuffle_order();
     }
     return track_list[shuffle_order[current_index++]];
 }
