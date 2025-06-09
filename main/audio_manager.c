@@ -6,6 +6,7 @@
 #include "fatfs_stream.h"
 #include "mp3_decoder.h"
 #include "a2dp_stream.h"
+#include "filter_resample.h"
 #include "playlist_manager.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -16,6 +17,7 @@ static audio_pipeline_handle_t pipeline = NULL;
 static audio_element_handle_t fatfs_reader = NULL;
 static audio_element_handle_t mp3_decoder = NULL;
 static audio_element_handle_t bt_stream_writer = NULL;
+static audio_element_handle_t rsp_handle = NULL;
 static audio_event_iface_handle_t evt = NULL;
 
 static void audio_event_task(void *param)
@@ -62,6 +64,12 @@ esp_err_t audio_manager_start(void)
     mp3_decoder_cfg_t mp3_cfg = DEFAULT_MP3_DECODER_CONFIG();
     mp3_decoder = mp3_decoder_init(&mp3_cfg);
 
+      rsp_filter_cfg_t rsp_cfg = DEFAULT_RESAMPLE_FILTER_CONFIG();
+    rsp_cfg.dest_rate = 44100;
+    rsp_cfg.dest_ch = 2;
+    rsp_cfg.src_rate = 48000;
+    rsp_handle = rsp_filter_init(&rsp_cfg);
+
     a2dp_stream_config_t a2dp_config = {
         .type = AUDIO_STREAM_WRITER,
         .user_callback = { 0 },
@@ -72,9 +80,10 @@ esp_err_t audio_manager_start(void)
 
     audio_pipeline_register(pipeline, fatfs_reader, "file");
     audio_pipeline_register(pipeline, mp3_decoder, "mp3");
+    audio_pipeline_register(pipeline, rsp_handle, "filter");
     audio_pipeline_register(pipeline, bt_stream_writer, "bt");
 
-    audio_pipeline_link(pipeline, (const char *[]) {"file", "mp3", "bt"}, 3);
+    audio_pipeline_link(pipeline, (const char *[]) {"file", "mp3", "filter", "bt"}, 4);
 
     audio_event_iface_cfg_t evt_cfg = AUDIO_EVENT_IFACE_DEFAULT_CFG();
     evt = audio_event_iface_init(&evt_cfg);
@@ -149,11 +158,13 @@ esp_err_t audio_manager_stop(void)
 
     audio_pipeline_unregister(pipeline, fatfs_reader);
     audio_pipeline_unregister(pipeline, mp3_decoder);
+        audio_pipeline_unregister(pipeline, rsp_handle);
     audio_pipeline_unregister(pipeline, bt_stream_writer);
 
     audio_pipeline_deinit(pipeline);
     audio_element_deinit(fatfs_reader);
     audio_element_deinit(mp3_decoder);
+
     audio_element_deinit(bt_stream_writer);
 
     if (evt) {

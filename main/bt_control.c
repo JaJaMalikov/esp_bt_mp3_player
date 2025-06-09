@@ -117,24 +117,24 @@ static void bt_app_a2dp_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *param) 
     }
 }
 
-void bt_app_avrc_ct_cb(avrc_ct_cb_event_t event, avrc_ct_cb_param_t *param) {
+void bt_app_avrc_ct_cb(esp_avrc_ct_cb_event_t event, esp_avrc_ct_cb_param_t *param) {
     switch(event) {
-        case AVRC_CT_CONNECTION_STATE_EVT:
+        case ESP_AVRC_CT_CONNECTION_STATE_EVT:
             ESP_LOGI(TAG, "AVRCP Connection State: %d", param->conn_stat.connected);
             break;
-        case AVRC_CT_PASSTHROUGH_RSP_EVT:
+        case ESP_AVRC_CT_PASSTHROUGH_RSP_EVT:
             switch(param->psth_rsp.key_code) {
-                case AVRC_PT_CMD_PLAY:
+                case ESP_AVRC_PT_CMD_PLAY:
                     audio_manager_start();
                     break;
-                case AVRC_PT_CMD_STOP:
-                case AVRC_PT_CMD_PAUSE:
+                case ESP_AVRC_PT_CMD_STOP:
+                case ESP_AVRC_PT_CMD_PAUSE:
                     audio_manager_stop();
                     break;
-                case AVRC_PT_CMD_FORWARD:
+                case ESP_AVRC_PT_CMD_FORWARD:
                     audio_manager_next();
                     break;
-                case AVRC_PT_CMD_BACKWARD:
+                case ESP_AVRC_PT_CMD_BACKWARD:
                     audio_manager_prev();
                     break;
                 default:
