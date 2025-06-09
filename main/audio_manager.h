@@ -30,6 +30,16 @@ esp_err_t audio_manager_next(void);
 esp_err_t audio_manager_prev(void);
 
 /**
+ * @brief Met en pause la lecture courante.
+ */
+esp_err_t audio_manager_pause(void);
+
+/**
+ * @brief Reprend la lecture après une pause.
+ */
+esp_err_t audio_manager_resume(void);
+
+/**
  * @brief Lit immediatement le fichier specifie.
  */
 esp_err_t audio_manager_play(const char *path);

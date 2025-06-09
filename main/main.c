@@ -95,7 +95,9 @@ esp_err_t play_handler(httpd_req_t *req) {
 
 esp_err_t ctl_handler(httpd_req_t *req) {
     if (strcmp(req->uri, "/pause")==0) {
-        audio_manager_stop();
+        audio_manager_pause();
+    } else if (strcmp(req->uri, "/resume")==0) {
+        audio_manager_resume();
     } else if (strcmp(req->uri, "/next")==0) {
         audio_manager_next();
     } else if (strcmp(req->uri, "/previous")==0) {
@@ -129,12 +131,14 @@ void start_httpd() {
     httpd_uri_t list_uri = {"/list", HTTP_GET, list_handler, NULL};
     httpd_uri_t play_uri = {"/play", HTTP_GET, play_handler, NULL};
     httpd_uri_t pause_uri = {"/pause", HTTP_GET, ctl_handler, NULL};
+    httpd_uri_t resume_uri = {"/resume", HTTP_GET, ctl_handler, NULL};
     httpd_uri_t next_uri = {"/next", HTTP_GET, ctl_handler, NULL};
     httpd_uri_t prev_uri = {"/previous", HTTP_GET, ctl_handler, NULL};
     httpd_uri_t current_uri = {"/current", HTTP_GET, current_handler, NULL};
     httpd_register_uri_handler(http_server, &list_uri);
     httpd_register_uri_handler(http_server, &play_uri);
     httpd_register_uri_handler(http_server, &pause_uri);
+    httpd_register_uri_handler(http_server, &resume_uri);
     httpd_register_uri_handler(http_server, &next_uri);
     httpd_register_uri_handler(http_server, &prev_uri);
     httpd_register_uri_handler(http_server, &current_uri);
