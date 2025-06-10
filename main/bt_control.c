@@ -180,6 +180,8 @@ esp_err_t bt_control_init(void) {
 
   ESP_ERROR_CHECK(esp_avrc_tg_init());
   esp_avrc_tg_register_callback(bt_app_avrc_tg_cb);
+  ESP_ERROR_CHECK(esp_avrc_ct_init());
+  esp_avrc_ct_register_callback(bt_app_avrc_ct_cb);
 
   esp_bt_gap_set_device_name("ESP_SOURCE_STREAM_DEMO");
   esp_bt_gap_set_pin(pin_type, 1, pin_code);

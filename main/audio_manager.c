@@ -158,7 +158,7 @@ esp_err_t audio_manager_stop(void)
 
     audio_pipeline_unregister(pipeline, fatfs_reader);
     audio_pipeline_unregister(pipeline, mp3_decoder);
-        audio_pipeline_unregister(pipeline, rsp_handle);
+    audio_pipeline_unregister(pipeline, rsp_handle);
     audio_pipeline_unregister(pipeline, bt_stream_writer);
 
     audio_pipeline_deinit(pipeline);
